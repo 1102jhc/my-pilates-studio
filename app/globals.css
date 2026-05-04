@@ -1,26 +1,20 @@
 @import "tailwindcss";
 
+@theme {
+  /* 필라테스 프리미엄 테마 컬러 설정 */
+  --color-brand-bg: #FDFBF9;
+  --color-brand-primary: #A8D1C7; /* 소프트 민트 */
+  --color-brand-secondary: #F5EBE0; /* 베이지 */
+  --color-brand-text: #333333;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  background-color: var(--color-brand-bg);
+  color: var(--color-brand-text);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    @apply antialiased;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
