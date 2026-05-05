@@ -2,17 +2,19 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import { usePathname, useRouter } from 'next/navigation';
+// ❌ 기존: import { supabase } from '@/lib/supabase';
+// ✅ 변경: 새로운 SSR 클라이언트를 가져옵니다.
+import { createClient } from '@/lib/supabase/client'; 
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const supabase = createClient();
+  const router = useRouter();
+  // 💡 supabase 객체를 여기서 생성합니다.
+  const supabase = createClient(); 
 
-  // 🚪 즉시 로그아웃 함수
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    // 세션 삭제를 미들웨어에 즉각 알리기 위해 새로고침하며 이동
     window.location.href = '/login';
   };
 
