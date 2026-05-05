@@ -1,6 +1,6 @@
 'use client';
 
-// 💡 여기서도 lucide-react에서 뭘 부르지 않고 깔끔하게 비웠습니다!
+import Link from 'next/link'; // ✨ 이동을 위해 추가
 
 export default function Footer() {
   return (
@@ -10,7 +10,17 @@ export default function Footer() {
         {/* 로고 및 카피라이트 */}
         <div className="text-center md:text-left">
           <h2 className="text-white text-xl font-bold tracking-tighter mb-2">PILATES STUDIO</h2>
-          <p className="text-sm">© 2026 Pilates Studio. All rights reserved.</p>
+          <div className="flex items-center justify-center md:justify-start gap-2">
+            <p className="text-sm">© 2026 Pilates Studio. All rights reserved.</p>
+            
+            {/* ✨ 원장님 전용 비밀 통로 ✨ */}
+            <Link 
+              href="/login" 
+              className="text-[10px] text-slate-600 hover:text-slate-400 transition-colors cursor-default"
+            >
+              Admin
+            </Link>
+          </div>
         </div>
 
         {/* 하단 링크 및 인스타그램 */}
@@ -18,7 +28,6 @@ export default function Footer() {
           <a href="#" className="hover:text-white transition-colors">이용약관</a>
           <a href="#" className="hover:text-white transition-colors">개인정보처리방침</a>
           
-          {/* ✨ 진짜 인스타그램 로고 적용 ✨ */}
           <a href="#" className="hover:text-[#A8D1C7] transition-colors flex items-center gap-2">
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
