@@ -4,9 +4,9 @@ import { motion } from 'framer-motion';
 
 const instructors = [
   {
-    name: '김지연 원장',
+    name: '박진선 원장',
     role: 'Head Instructor',
-    description: '재활 필라테스 전문, 체형 교정 마스터',
+    description: '육아로 늘어난 살, 식단까지 관리해주는 이 시대 최고의 원장(feat. 아리따운 구운밤 공주님 육아)',
     image: 'https://images.unsplash.com/photo-1548690312-e3b507d8c110?q=80&w=800&auto=format&fit=crop',
   },
   {

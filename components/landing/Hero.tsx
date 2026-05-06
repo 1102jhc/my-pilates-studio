@@ -3,9 +3,17 @@
 import { motion } from 'framer-motion';
 
 export default function Hero() {
+  // 특정 ID로 부드럽게 스크롤하는 함수
+  const handleScroll = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <section className="relative h-screen flex items-center justify-center overflow-hidden">
-      {/* 배경 이미지 & 어두운 오버레이 (글씨가 잘 보이게 함) */}
+      {/* 배경 이미지 & 어두운 오버레이 */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-black/40 z-10" /> 
         <img 
@@ -53,10 +61,18 @@ export default function Hero() {
           transition={{ duration: 1, delay: 0.6 }}
           className="flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
-          <button className="w-full sm:w-auto px-8 py-4 bg-[#A8D1C7] text-slate-900 rounded-full font-bold hover:bg-[#8eb8ae] transition-all shadow-lg hover:scale-105">
+          {/* onClick 이벤트로 스크롤 처리 */}
+          <button 
+            onClick={() => handleScroll('free-trial')}
+            className="w-full sm:w-auto px-8 py-4 bg-[#A8D1C7] text-slate-900 rounded-full font-bold hover:bg-[#8eb8ae] transition-all shadow-lg hover:scale-105 text-center"
+          >
             1:1 무료 체험 신청
           </button>
-          <button className="w-full sm:w-auto px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium hover:bg-white/20 transition-all">
+
+          <button 
+            onClick={() => handleScroll('programs')}
+            className="w-full sm:w-auto px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-medium hover:bg-white/20 transition-all text-center"
+          >
             프로그램 안내
           </button>
         </motion.div>
