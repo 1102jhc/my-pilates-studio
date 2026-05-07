@@ -12,7 +12,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko" className="scroll-smooth">
+    <html lang="ko" className="scroll-smooth" data-scroll-behavior="smooth">
       <body className="antialiased text-slate-800">{children}</body>
     </html>
   );
