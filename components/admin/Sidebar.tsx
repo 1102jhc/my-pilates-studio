@@ -1,127 +1,98 @@
-'use client';
+'use client'
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import React from 'react'
+import Link from 'next/link'
+import useSWR from 'swr'
+import { createClient } from '@/lib/supabase/client'
+import { motion } from 'framer-motion'
 
-export default function Sidebar() {
-  const pathname = usePathname();
-  const supabase = createClient();
-  // 📱 모바일 메뉴 상태 관리
-  const [isOpen, setIsOpen] = useState(false);
+export type ViewType = 'home' | 'inquiry' | 'instructors' | 'programs';
+
+// ✅ 설계도는 완벽하게 (11개 칼럼 전체 타입)
+export interface Inquiry {
+  id: string;
+  created_at: string;
+  name: string;
+  phone: string;
+  gender: string | null;
+  experience: string | null;
+  purpose: string | null;
+  preferred_time: string | null;
+  content: string | null;
+  status: string | null;
+  memo: string | null;
+}
+
+interface SidebarProps {
+  currentView: ViewType;
+  setCurrentView: (view: ViewType) => void;
+}
+
+const fetcher = async (): Promise<Inquiry[]> => {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('inquiries')
+    .select('id, created_at, name, phone, content, status') // 컬럼 개수를 100% 일치시켜야 함
+    .order('created_at', { ascending: false })
+  
+  if (error) throw error
+  return data as Inquiry[]
+}
+
+export default function Sidebar({ currentView, setCurrentView }: SidebarProps) {
+  const supabase = createClient()
+  const { data: inquiries } = useSWR<Inquiry[]>('admin/inquiries-list', fetcher)
+  const pendingCount = inquiries?.filter(item => item.status === '대기').length || 0
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    window.location.href = '/login';
-  };
+    await supabase.auth.signOut()
+    window.location.href = '/login'
+  }
 
-  const menus = [
-    { label: '대시보드 홈', href: '/dashboard', count: 0 },
-    { label: '상담 신청 내역', href: '/inquiry', count: 3 },
-    { label: '강사 프로필 관리', href: '/instructors', count: 0 },
-    { label: '프로그램 설정', href: '/programs', count: 0 },
-    { label: '사이트 통계', href: '/stats', count: 0 },
-  ];
+  const menus: { id: ViewType; label: string }[] = [
+    { id: 'home', label: '대시보드 홈' },
+    { id: 'inquiry', label: '상담 신청 내역' },
+    { id: 'instructors', label: '강사 프로필 관리' },
+    { id: 'programs', label: '프로그램 설정' },
+  ]
 
   return (
-    <>
-      {/* 1. 모바일용 플로팅 토글 버튼 (PC에서는 숨김) */}
-      {!isOpen && (
-        <button 
-          onClick={() => setIsOpen(true)}
-          className="md:hidden fixed top-6 right-6 z-50 p-3 bg-indigo-600 text-white rounded-2xl shadow-xl shadow-indigo-200 active:scale-95 transition-transform"
-        >
-          <span className="text-xl">☰</span>
-        </button>
-      )}
-
-      {/* 2. 사이드바 본체 */}
-      <aside className={`
-        /* 공통: 너비 고정 및 수축 방지 */
-        w-[320px] min-w-[320px] flex-shrink-0 bg-white border-l border-gray-100 flex flex-col h-screen
+    <aside className="w-[320px] min-w-[320px] bg-white border-l border-gray-100 flex flex-col h-screen sticky top-0 right-0 z-50 shadow-sm">
+      <div className="p-10 flex flex-col h-full items-start">
+        <button onClick={() => setCurrentView('home')} className="w-12 h-12 bg-indigo-600 rounded-2xl mb-8 flex items-center justify-center text-white font-bold text-xl hover:scale-105 transition-transform">P</button>
         
-        /* 📱 모바일: 오른쪽 화면 밖으로 밀어두기 (fixed) */
-        fixed top-0 right-0 z-[60] transition-transform duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0' : 'translate-x-full'}
-        
-        /* 💻 PC: 화면에 붙여두고 항상 노출 (sticky) */
-        md:sticky md:translate-x-0
-      `}>
-        <div className="p-10 flex flex-col h-full items-start">
-          
-          {/* 모바일용 닫기 버튼 */}
-          <button 
-            onClick={() => setIsOpen(false)}
-            className="md:hidden self-end mb-4 p-2 text-gray-400 hover:text-gray-600"
-          >
-            ✕ 닫기
-          </button>
+        <Link href="/" className="mb-12 text-left group outline-none block">
+          <p className="text-[11px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-2 group-hover:text-indigo-400 transition-colors">Administrator</p>
+          <h2 className="text-2xl font-bold text-gray-900 leading-tight group-hover:text-indigo-600 transition-colors">
+            딤섬 필라테스<br/><span className="text-indigo-600 underline decoration-indigo-100 underline-offset-4">원장님</span>
+          </h2>
+        </Link>
 
-          {/* 프로필 섹션 */}
-          <div className="w-12 h-12 bg-indigo-600 rounded-2xl mb-8 shadow-xl shadow-indigo-100 flex items-center justify-center text-white">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-          </div>
-          
-          {/* 프로필 섹션: 클릭 시 메인 페이지('/')로 이동 */}
-          <div className="mb-12 text-left">
-            <Link href="/" className="group block">
-              <p className="text-[11px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-2 group-hover:text-indigo-400 transition-colors">
-                Administrator
-              </p>
-              <h2 className="text-2xl font-bold text-gray-900 leading-tight group-hover:text-indigo-600 transition-colors break-keep">
-                딤섬 필라테스<br/>
-                <span className="relative">
-                  원장님
-                  {/* 호버 시 나타나는 밑줄 효과 (선택 사항) */}
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-indigo-600 transition-all group-hover:w-full"></span>
-                </span>
-              </h2>
-            </Link>
-          </div>
+        <nav className="w-full space-y-2 flex-1">
+          {menus.map((menu) => {
+            const isActive = currentView === menu.id
+            return (
+              <button
+                key={menu.id}
+                onClick={() => setCurrentView(menu.id)}
+                className={`w-full relative flex items-center justify-between px-6 py-4 rounded-2xl transition-all outline-none ${isActive ? 'text-indigo-700 font-bold' : 'text-gray-500 hover:bg-gray-50'}`}
+              >
+                {isActive && <motion.div layoutId="active-pill" className="absolute inset-0 bg-indigo-50 rounded-2xl -z-10 border border-indigo-100/50" />}
+                <span className="text-[15px] z-10">{menu.label}</span>
+                {menu.id === 'inquiry' && pendingCount > 0 && (
+                  <span className="z-10 ml-2 px-2 py-0.5 bg-red-500 text-white text-[10px] font-black rounded-full min-w-[1.5rem] flex items-center justify-center shadow-sm shadow-red-200">
+                    {pendingCount}
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </nav>
 
-          {/* 메뉴 네비게이션 */}
-          <nav className="w-full space-y-2 flex-1">
-            {menus.map((menu) => (
-              <Link key={menu.href} href={menu.href} onClick={() => setIsOpen(false)}>
-                <div className={`
-                  flex items-center justify-between px-6 py-4 rounded-2xl transition-all cursor-pointer mb-1
-                  ${pathname === menu.href 
-                    ? 'bg-indigo-50 text-indigo-700 font-bold shadow-sm' 
-                    : 'text-gray-500 hover:bg-gray-50'}
-                `}>
-                  <span className="text-[15px]">{menu.label}</span>
-                  {menu.count > 0 && (
-                    <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
-                      {menu.count}
-                    </span>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </nav>
-
-          {/* 하단 로그아웃 */}
-          <div className="mt-auto w-full pt-8 border-t border-gray-50">
-            <button 
-              onClick={handleLogout}
-              className="w-full text-left px-6 py-2 text-sm text-gray-400 hover:text-red-500 transition-colors font-medium"
-            >
-              로그아웃
-            </button>
-          </div>
+        <div className="mt-auto w-full pt-8 border-t border-gray-50">
+          <button onClick={handleLogout} className="w-full text-left px-6 py-2 text-sm text-gray-400 hover:text-red-500 font-medium">로그아웃</button>
         </div>
-      </aside>
-
-      {/* 3. 모바일용 배경 오버레이 (열려있을 때만) */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[55] md:hidden transition-opacity"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-    </>
-  );
+      </div>
+    </aside>
+  )
 }
